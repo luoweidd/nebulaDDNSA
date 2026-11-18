@@ -37,9 +37,10 @@
 
 ### GitHub Actions 自动发布
 
-- Pull request、推送到 `main` 及手动触发会运行依赖锁定检查、静态分析、完整测试和 Windows x64 Release 构建。
-- 推送与 `pubspec.yaml` 版本一致的 `vX.Y.Z` 标签（例如 `v1.0.0`）后，检查通过会自动创建 GitHub Release，并附上 `Nebula-DDNS-X.Y.Z-Windows-x64.zip`。
-- 当前自动分发仅覆盖 Windows x64；其他平台须在相应工具链和设备上单独验证后再加入发布流程。
+- Pull request、推送到 `main` 及手动触发会运行 Windows、Linux、macOS 和 iOS 的 CI 构建；依赖锁定、静态分析和 Dart 测试由桌面与 macOS 工作流执行。
+- 推送与 `pubspec.yaml` 版本一致的 `vX.Y.Z` 标签（例如 `v1.0.0`）后，桌面 CI 会自动创建 GitHub Release，并附上 Windows x64 与 Linux x64 产物。
+- Apple 工作流只上传 7 天有效的 CI 构建产物，不会发布到 GitHub Release；iOS 产物不签名，macOS 产物未完成分发签名/公证，不能视为可直接分发的正式安装包。
+- 原生 HarmonyOS HAP 仍需匹配的 CPF-Flutter/OpenHarmony SDK 与 DevEco 工具链；当前不在 GitHub 托管 Runner 上自动构建。
 - Windows ZIP 属于通用构建产物，本项目不将其发布到 GitHub Packages；按当前分发方式使用 GitHub Releases。
 
 ### 发布内容
@@ -78,7 +79,7 @@ Linux:
 flutter build linux --release
 ```
 
-Linux 构建须在 Linux 主机上执行，并安装 GTK、系统托盘和安全存储所需开发依赖（Ubuntu/Debian 示例）：
+Linux 发布由 GitHub Actions 在 Ubuntu 上执行 Release 构建，并随 Windows 产物一起发布为 `Nebula-DDNS-X.Y.Z-Linux-x64.tar.gz`。本地构建须在 Linux 主机上执行，并安装 GTK、系统托盘和安全存储所需开发依赖（Ubuntu/Debian 示例）：
 
 ```shell
 sudo apt-get update
@@ -167,4 +168,4 @@ Flutter 上游的支持矩阵列有 Android `arm32/arm64`、Windows `x64/arm64`�
 
 HarmonyOS 的社区 SDK 已迁移至 [CPF-Flutter](https://gitcode.com/CPF-Flutter/flutter_flutter)。它是上游 Flutter 之外的独立分支，OHOS 插件也有独立兼容性与发布周期，不等同于 Flutter 上游支持。采用前须核对当前维护分支、目标设备系统版本、SDK/DevEco 兼容矩阵及相关插件实现；不能只依赖旧版 Gitee 示例或把普通 Android APK 当作原生 HAP 发布。
 
-本项目记录的本机 Flutter 工具链为 3.41.4；以上上游平台矩阵页面当前描述的是 Flutter 3.50。应在实际发布所用 Flutter 版本上重新运行 `flutter doctor -v`、目标架构构建，并完成至少一次目标设备安装验证。平台可构建性、插件可用性、签名/商店审核和设备运行验证是彼此独立的验收项。
+本项目记录的本机 Flutter 工具链为 3.50.0；以上上游平台矩阵页面当前描述的是 Flutter 3.50。应在实际发布所用 Flutter 版本上重新运行 `flutter doctor -v`、目标架构构建，并完成至少一次目标设备安装验证。平台可构建性、插件可用性、签名/商店审核和设备运行验证是彼此独立的验收项。
