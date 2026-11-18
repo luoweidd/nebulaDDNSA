@@ -1,0 +1,58 @@
+# Nebula DDNS Client - Flutter 企业级 DDNS 客户端
+# 技术栈：Flutter + Riverpod + Dio + Tray Manager
+
+name: nebula_ddns
+description: A production-grade, cross-platform DDNS client with enterprise-level UX/UI.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.11.0 <4.0.0'
+  flutter: '>=3.41.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # 状态管理
+  flutter_riverpod: ^2.5.0
+  
+  # HTTP 客户端（企业级）
+  dio: ^5.4.0
+  
+  # 桌面端托盘管理
+  tray_manager: ^0.3.0
+  
+  # 移动端后台服务
+  flutter_background_service: ^3.0.0
+  
+  # 本地数据持久化
+  shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.2.4
+  
+  # UI/UX 增强
+  json_annotation: ^4.8.1
+  
+  # 日志记录
+  logger: ^2.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
+  json_serializable: ^6.7.1
+
+flutter:
+  uses-material-design: true
+  
+  # Material 3 主题配置
+  assets:
+    - assets/icons/
+  
+  # 托盘图标（桌面端）
+  fonts:
+    - family: NebulaIcons
+      fonts:
+        - asset: assets/fonts/NebulaIcons.ttf

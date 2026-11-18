@@ -1,0 +1,877 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "nebulaDDNSA",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "nebulaDDNSA (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "nebulaDDNSA (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "ohos",
+            "cwd": "platforms\\ohos",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "ohos (profile mode)",
+            "cwd": "platforms\\ohos",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "ohos (release mode)",
+            "cwd": "platforms\\ohos",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_secure_storage_ohos-545fb022eed8ce7891028d4851a617b9a8328177",
+            "cwd": ".pub-cache\\git\\flutter_secure_storage_ohos-545fb022eed8ce7891028d4851a617b9a8328177",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_secure_storage_ohos-545fb022eed8ce7891028d4851a617b9a8328177 (profile mode)",
+            "cwd": ".pub-cache\\git\\flutter_secure_storage_ohos-545fb022eed8ce7891028d4851a617b9a8328177",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_secure_storage_ohos-545fb022eed8ce7891028d4851a617b9a8328177 (release mode)",
+            "cwd": ".pub-cache\\git\\flutter_secure_storage_ohos-545fb022eed8ce7891028d4851a617b9a8328177",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "shared_preferences_ohos-1562f7cc77e3bd2ca467ed2a927ee3497f3d96bf",
+            "cwd": ".pub-cache\\git\\shared_preferences_ohos-1562f7cc77e3bd2ca467ed2a927ee3497f3d96bf",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shared_preferences_ohos-1562f7cc77e3bd2ca467ed2a927ee3497f3d96bf (profile mode)",
+            "cwd": ".pub-cache\\git\\shared_preferences_ohos-1562f7cc77e3bd2ca467ed2a927ee3497f3d96bf",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "shared_preferences_ohos-1562f7cc77e3bd2ca467ed2a927ee3497f3d96bf (release mode)",
+            "cwd": ".pub-cache\\git\\shared_preferences_ohos-1562f7cc77e3bd2ca467ed2a927ee3497f3d96bf",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "example",
+            "cwd": ".pub-cache\\git\\shared_preferences_ohos-1562f7cc77e3bd2ca467ed2a927ee3497f3d96bf\\example",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "example (profile mode)",
+            "cwd": ".pub-cache\\git\\shared_preferences_ohos-1562f7cc77e3bd2ca467ed2a927ee3497f3d96bf\\example",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "example (release mode)",
+            "cwd": ".pub-cache\\git\\shared_preferences_ohos-1562f7cc77e3bd2ca467ed2a927ee3497f3d96bf\\example",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "args-2.7.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\args-2.7.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "async-2.13.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\async-2.13.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "characters-1.4.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\characters-1.4.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "clock-1.1.3",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\clock-1.1.3",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "code_assets-1.2.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\code_assets-1.2.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "collection-1.19.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\collection-1.19.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "crypto-3.0.8",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\crypto-3.0.8",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "dio-5.11.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\dio-5.11.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "dio_web_adapter-2.2.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\dio_web_adapter-2.2.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "ffi-2.2.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\ffi-2.2.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "file-7.0.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\file-7.0.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_background_service-3.0.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service-3.0.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_background_service-3.0.2 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service-3.0.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_background_service-3.0.2 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service-3.0.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_background_service_android-4.0.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service_android-4.0.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_background_service_android-4.0.2 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service_android-4.0.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_background_service_android-4.0.2 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service_android-4.0.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_background_service_ios-3.0.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service_ios-3.0.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_background_service_ios-3.0.0 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service_ios-3.0.0",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_background_service_ios-3.0.0 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service_ios-3.0.0",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_background_service_platform_interface-3.0.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service_platform_interface-3.0.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_background_service_platform_interface-3.0.0 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service_platform_interface-3.0.0",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_background_service_platform_interface-3.0.0 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_background_service_platform_interface-3.0.0",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_riverpod-2.6.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_riverpod-2.6.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_riverpod-2.6.1 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_riverpod-2.6.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_riverpod-2.6.1 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_riverpod-2.6.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_secure_storage-9.2.4",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage-9.2.4",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_secure_storage-9.2.4 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage-9.2.4",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_secure_storage-9.2.4 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage-9.2.4",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_secure_storage_linux-1.2.3",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_linux-1.2.3",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_secure_storage_linux-1.2.3 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_linux-1.2.3",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_secure_storage_linux-1.2.3 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_linux-1.2.3",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_secure_storage_macos-3.1.3",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_macos-3.1.3",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_secure_storage_macos-3.1.3 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_macos-3.1.3",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_secure_storage_macos-3.1.3 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_macos-3.1.3",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_secure_storage_platform_interface-1.1.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_platform_interface-1.1.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_secure_storage_platform_interface-1.1.2 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_platform_interface-1.1.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_secure_storage_platform_interface-1.1.2 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_platform_interface-1.1.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_secure_storage_web-1.2.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_web-1.2.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_secure_storage_web-1.2.1 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_web-1.2.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_secure_storage_web-1.2.1 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_web-1.2.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_secure_storage_windows-3.1.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_windows-3.1.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_secure_storage_windows-3.1.2 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_windows-3.1.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_secure_storage_windows-3.1.2 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\flutter_secure_storage_windows-3.1.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "hooks-2.0.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\hooks-2.0.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "http_parser-4.1.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\http_parser-4.1.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "jni-1.1.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\jni-1.1.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "jni_flutter-1.0.4+1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\jni_flutter-1.0.4+1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "jni_flutter-1.0.4+1 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\jni_flutter-1.0.4+1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "jni_flutter-1.0.4+1 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\jni_flutter-1.0.4+1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "jni_util-1.0.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\jni_util-1.0.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "js-0.6.7",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\js-0.6.7",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "json_annotation-4.12.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\json_annotation-4.12.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "logger-2.8.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\logger-2.8.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "logging-1.3.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\logging-1.3.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "material_color_utilities-0.13.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\material_color_utilities-0.13.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "menu_base-0.1.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\menu_base-0.1.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "menu_base-0.1.1 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\menu_base-0.1.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "menu_base-0.1.1 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\menu_base-0.1.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "meta-1.17.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\meta-1.17.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "mime-2.1.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\mime-2.1.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "objective_c-9.5.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\objective_c-9.5.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "package_config-3.0.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\package_config-3.0.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "path-1.9.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path-1.9.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "path_provider-2.1.6",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider-2.1.6",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "path_provider-2.1.6 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider-2.1.6",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "path_provider-2.1.6 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider-2.1.6",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "path_provider_android-2.3.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_android-2.3.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "path_provider_android-2.3.1 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_android-2.3.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "path_provider_android-2.3.1 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_android-2.3.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "path_provider_foundation-2.6.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_foundation-2.6.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "path_provider_foundation-2.6.0 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_foundation-2.6.0",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "path_provider_foundation-2.6.0 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_foundation-2.6.0",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "path_provider_linux-2.2.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_linux-2.2.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "path_provider_linux-2.2.2 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_linux-2.2.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "path_provider_linux-2.2.2 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_linux-2.2.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "path_provider_platform_interface-2.1.3",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_platform_interface-2.1.3",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "path_provider_platform_interface-2.1.3 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_platform_interface-2.1.3",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "path_provider_platform_interface-2.1.3 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_platform_interface-2.1.3",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "path_provider_windows-2.3.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_windows-2.3.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "path_provider_windows-2.3.0 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_windows-2.3.0",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "path_provider_windows-2.3.0 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\path_provider_windows-2.3.0",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "platform-3.1.6",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\platform-3.1.6",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "plugin_platform_interface-2.1.8",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\plugin_platform_interface-2.1.8",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "pub_semver-2.2.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\pub_semver-2.2.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "record_use-0.6.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\record_use-0.6.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "riverpod-2.6.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\riverpod-2.6.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shared_preferences_android-2.4.23",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_android-2.4.23",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shared_preferences_android-2.4.23 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_android-2.4.23",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "shared_preferences_android-2.4.23 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_android-2.4.23",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "shared_preferences_foundation-2.5.7",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_foundation-2.5.7",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shared_preferences_foundation-2.5.7 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_foundation-2.5.7",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "shared_preferences_foundation-2.5.7 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_foundation-2.5.7",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "shared_preferences_linux-2.4.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_linux-2.4.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shared_preferences_linux-2.4.1 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_linux-2.4.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "shared_preferences_linux-2.4.1 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_linux-2.4.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "shared_preferences_platform_interface-2.4.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_platform_interface-2.4.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shared_preferences_platform_interface-2.4.2 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_platform_interface-2.4.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "shared_preferences_platform_interface-2.4.2 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_platform_interface-2.4.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "shared_preferences_web-2.4.3",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_web-2.4.3",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shared_preferences_web-2.4.3 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_web-2.4.3",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "shared_preferences_web-2.4.3 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_web-2.4.3",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "shared_preferences_windows-2.4.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_windows-2.4.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "shared_preferences_windows-2.4.1 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_windows-2.4.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "shared_preferences_windows-2.4.1 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shared_preferences_windows-2.4.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "shortid-0.1.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\shortid-0.1.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "source_span-1.10.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\source_span-1.10.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "stack_trace-1.12.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\stack_trace-1.12.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "state_notifier-1.0.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\state_notifier-1.0.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "string_scanner-1.4.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\string_scanner-1.4.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "term_glyph-1.2.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\term_glyph-1.2.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "tray_manager-0.3.2",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\tray_manager-0.3.2",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "tray_manager-0.3.2 (profile mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\tray_manager-0.3.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "tray_manager-0.3.2 (release mode)",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\tray_manager-0.3.2",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "typed_data-1.4.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\typed_data-1.4.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "vector_math-2.2.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\vector_math-2.2.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "web-1.1.1",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\web-1.1.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "win32-5.15.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\win32-5.15.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "xdg_directories-1.1.0",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\xdg_directories-1.1.0",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "yaml-3.1.4",
+            "cwd": ".pub-cache\\hosted\\pub.dev\\yaml-3.1.4",
+            "request": "launch",
+            "type": "dart"
+        }
+    ]
+}

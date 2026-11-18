@@ -1,0 +1,25 @@
+name: nebula_ddns_ohos
+description: OpenHarmony application wrapper for Nebula DDNS.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  nebula_ddns:
+    path: ../..
+  shared_preferences_ohos:
+    git:
+      url: https://github.com/naizhao/shared_preferences_ohos.git
+      ref: 1562f7cc77e3bd2ca467ed2a927ee3497f3d96bf
+  flutter_secure_storage_ohos:
+    git:
+      url: https://github.com/ClosedHarmony/flutter_secure_storage_ohos.git
+      ref: 545fb022eed8ce7891028d4851a617b9a8328177
+
+flutter:
+  uses-material-design: true

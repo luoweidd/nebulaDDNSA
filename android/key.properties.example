@@ -1,0 +1,4 @@
+storeFile=../nebula-ddns-release.jks
+storePassword=CHANGE_ME
+keyAlias=nebula-ddns
+keyPassword=CHANGE_ME
