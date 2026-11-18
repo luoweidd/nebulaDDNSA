@@ -7,8 +7,8 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.11.0 <4.0.0'
-  flutter: '>=3.41.0'
+  sdk: '>=3.14.0 <4.0.0'
+  flutter: '>=3.50.0'
 
 dependencies:
   flutter:
@@ -24,7 +24,7 @@ dependencies:
   tray_manager: ^0.3.0
   
   # 移动端后台服务
-  flutter_background_service: ^3.0.0
+  flutter_background_service: 5.1.0
   
   # 本地数据持久化
   shared_preferences: ^2.2.2
