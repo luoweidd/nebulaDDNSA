@@ -66,9 +66,13 @@ flutter build windows --release
 Android（Windows 可构建；Release 发布需配置真实签名）:
 
 ```powershell
+$env:PUB_CACHE = Join-Path $PWD '.pub-cache'
+flutter pub get
 flutter build apk --debug
 flutter build appbundle --release
 ```
+
+Windows 项目目录与默认 Pub 缓存位于不同盘符时，请像上例一样把 `PUB_CACHE` 放在项目所在盘，避免 Kotlin 增量编译器处理跨盘路径失败。
 
 正式 Android Release 签名：将 `android/key.properties.example` 复制为 `android/key.properties`，填写自己的 JKS 路径、密码和别名。不要提交 `key.properties` 或 keystore 文件。当前 Gradle 配置在未提供签名配置时使用 Debug 签名，只适用于本地验证，不可作为商店发布包。
 
@@ -158,7 +162,7 @@ Flutter 上游的支持矩阵列有 Android `arm32/arm64`、Windows `x64/arm64`�
 
 | 目标平台 / 架构 | 特殊构建要求 | 本项目验证状态 |
 | --- | --- | --- |
-| Android ARM32/ARM64 | 可从 Windows/Linux/macOS 主机交叉构建；需要 Android SDK、NDK 和可下载的 Gradle 依赖。APK/AAB 中的 ABI 由构建选项和打包方式决定；发布需用正式密钥签名。还需在目标设备上验证后台服务和厂商省电策略。 | 本机 Android Debug 构建仍因无法解析 `plugins.gradle.org`、下载 Kotlin Gradle 插件失败；ARM 架构产物未验证。 |
+| Android ARM32/ARM64 | 可从 Windows/Linux/macOS 主机交叉构建；需要 Android SDK、NDK 和可下载的 Gradle 依赖。APK/AAB 中的 ABI 由构建选项和打包方式决定；发布需用正式密钥签名。还需在目标设备上验证后台服务和厂商省电策略。 | Gradle Wrapper、Android Gradle Plugin、Kotlin 插件和后台服务插件已升级到 Flutter 3.50 兼容配置；CI 构建 Android Debug APK。仍需 Android CI 实跑及目标设备验证后台服务和厂商省电策略。 |
 | Windows ARM64 | 需要 Windows 构建环境及能生成 ARM64 目标的 Visual Studio C++ 工具链；依赖的插件及本地二进制也必须提供 ARM64 实现。发布前应在 ARM64 Windows 设备上验证安装、托盘和开机启动。 | 只验证过 Windows x64 Release；当前产物位于 `build\windows\x64\...`，不能据此认定 ARM64 已构建。 |
 | Linux ARM64 | Flutter 上游支持指定的 Debian/Ubuntu ARM64 目标。建议在相应 ARM64 Linux 主机或匹配的 CI Runner 构建；从 x64 主机交叉构建通常还需配置 C/C++ 交叉工具链、GTK 开发库及目标架构依赖，不能只靠 Flutter 命令自动完成。 | 未构建或实机验证。 |
 | macOS ARM64 | 需要 macOS 和 Xcode。签名、沙盒权限及公证要求取决于分发渠道；还需确认所用原生插件包含 arm64 支持。 | 未构建或实机验证。 |
@@ -167,4 +171,4 @@ Flutter 上游的支持矩阵列有 Android `arm32/arm64`、Windows `x64/arm64`�
 
 HarmonyOS 的社区 SDK 已迁移至 [CPF-Flutter](https://gitcode.com/CPF-Flutter/flutter_flutter)。它是上游 Flutter 之外的独立分支，OHOS 插件也有独立兼容性与发布周期，不等同于 Flutter 上游支持。采用前须核对当前维护分支、目标设备系统版本、SDK/DevEco 兼容矩阵及相关插件实现；不能只依赖旧版 Gitee 示例或把普通 Android APK 当作原生 HAP 发布。
 
-本项目记录的本机 Flutter 工具链为 3.41.4；以上上游平台矩阵页面当前描述的是 Flutter 3.50。应在实际发布所用 Flutter 版本上重新运行 `flutter doctor -v`、目标架构构建，并完成至少一次目标设备安装验证。平台可构建性、插件可用性、签名/商店审核和设备运行验证是彼此独立的验收项。
+本项目记录的本机 Flutter 工具链为 3.50.0；以上上游平台矩阵页面当前描述的是 Flutter 3.50。应在实际发布所用 Flutter 版本上重新运行 `flutter doctor -v`、目标架构构建，并完成至少一次目标设备安装验证。平台可构建性、插件可用性、签名/商店审核和设备运行验证是彼此独立的验收项。
