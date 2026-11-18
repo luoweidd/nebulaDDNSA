@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nebula_ddns/config/ddns_config.dart';
 import 'package:nebula_ddns/providers/ddns_logs_provider.dart';
 import 'package:nebula_ddns/services/configurable_ddns_service.dart';
+import 'package:nebula_ddns/services/network_settings.dart';
+import 'package:nebula_ddns/services/public_ip_addresses.dart';
 import 'package:nebula_ddns/ddns_manager.dart';
 import 'package:nebula_ddns/scheduler/scheduler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,7 +29,9 @@ final systemBootManagerProvider = Provider<SystemBootManager>(
 final ddnsManagerProvider =
     StateNotifierProvider<DDNSManagerNotifier, Map<String, dynamic>>((ref) {
   // 实例化服务和调度器（具体调度器由 main.dart 决定）
-  final ddnsService = ConfigurableDDNSService();
+  final ddnsService = ConfigurableDDNSService(
+    networkSettingsProvider: NetworkSettingsStore.load,
+  );
   // 初始调度器占位，实际调度器在 main.dart 注入
   final scheduler = PlatformManager.supportsMobileBackground
       ? ExternalScheduler()
@@ -62,6 +66,8 @@ class DDNSManagerNotifier extends StateNotifier<Map<String, dynamic>> {
           'serviceType': null,
           'startOnSystemBoot': false,
           'publicIP': null,
+          'publicIPv4': null,
+          'publicIPv6': null,
           'updateIntervalSeconds': 300,
         });
 
@@ -198,13 +204,40 @@ class DDNSManagerNotifier extends StateNotifier<Map<String, dynamic>> {
   }
 
   /// 获取公网 IP
-  Future<String?> getPublicIP() async {
-    final ip = await _manager.getPublicIP();
+  Future<String?> getPublicIP({bool forceRefresh = false}) async {
+    final ip = await _manager.getPublicIP(forceRefresh: forceRefresh);
     if (ip != null) {
       state = {...state, 'publicIP': ip};
       _ref.read(ddnsLogsProvider.notifier).add('公网 IP: $ip');
+    } else if (forceRefresh) {
+      state = {...state, 'publicIP': null};
     }
     return ip;
+  }
+
+  Future<PublicIPAddresses> getPublicIPs() async {
+    try {
+      final addresses = await _manager.getPublicIPs();
+      state = {
+        ...state,
+        'publicIP': addresses.primary,
+        'publicIPv4': addresses.ipv4,
+        'publicIPv6': addresses.ipv6,
+      };
+      _ref.read(ddnsLogsProvider.notifier).add(
+            '公网 IP - IPv4: ${addresses.ipv4 ?? '未获取'}, IPv6: ${addresses.ipv6 ?? '未获取'}',
+          );
+      return addresses;
+    } catch (error) {
+      state = {
+        ...state,
+        'publicIP': null,
+        'publicIPv4': null,
+        'publicIPv6': null,
+      };
+      _ref.read(ddnsLogsProvider.notifier).add('刷新公网 IP 失败：$error');
+      rethrow;
+    }
   }
 
   /// 清空日志

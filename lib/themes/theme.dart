@@ -84,13 +84,18 @@ class AppTheme {
 
   /// 获取 Material 3 主题（深色模式）
   static ThemeData get darkTheme {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: _seedColor,
+      brightness: Brightness.dark,
+      primary: const Color(0xFF7986CB),
+      secondary: const Color(0xFF4FC3F7),
+    );
     return ThemeData(useMaterial3: true).copyWith(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _seedColor,
-        brightness: Brightness.dark,
-        primary: const Color(0xFF7986CB),
-        secondary: const Color(0xFF4FC3F7),
-      ),
+      colorScheme: colorScheme,
+      textTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: colorScheme,
+      ).textTheme,
       scaffoldBackgroundColor: const Color(0xFF121212),
       appBarTheme: const AppBarTheme(
         centerTitle: true,

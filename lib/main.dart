@@ -20,6 +20,7 @@ import 'themes/theme.dart';
 import 'config/ddns_config.dart';
 import 'platform/platform_manager.dart';
 import 'services/configurable_ddns_service.dart';
+import 'services/network_settings.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,7 +74,10 @@ Future<void> _performMobileBackgroundUpdate() async {
           (map['updateRequestConfig'] as Map?)?.cast<String, dynamic>(),
       startOnSystemBoot: map['startOnSystemBoot'] == true,
     );
-    await ConfigurableDDNSService(dioInstance: Dio()).updateDDNS(config);
+    await ConfigurableDDNSService(
+      dioInstance: Dio(),
+      networkSettingsProvider: NetworkSettingsStore.load,
+    ).updateDDNS(config);
   } catch (error, stackTrace) {
     developer.log(
       'Mobile background DDNS update failed.',

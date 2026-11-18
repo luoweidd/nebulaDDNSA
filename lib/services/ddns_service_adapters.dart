@@ -186,12 +186,15 @@ class DuckDNSAdapter extends DDNSServiceAdapter {
     }
 
     try {
+      final isIPv6 =
+          config.updateRequestConfig['ip_type']?.toString().toLowerCase() ==
+              'ipv6';
       final response = await _dio.post(
         'https://www.duckdns.org/update',
         data: <String, dynamic>{
           'domains': subdomain,
           'token': token,
-          'ip': ip,
+          if (isIPv6) 'ipv6': ip else 'ip': ip,
         },
       );
 

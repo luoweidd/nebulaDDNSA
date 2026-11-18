@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +9,7 @@ import '../config/ddns_config.dart';
 import '../providers/ddns_logs_provider.dart';
 import '../providers/ddns_manager_provider.dart';
 import 'ddns_config_screen.dart';
+import 'network_settings_screen.dart';
 
 class DDNSDashboardScreen extends ConsumerStatefulWidget {
   const DDNSDashboardScreen({super.key});
@@ -52,6 +55,7 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
     } finally {
       if (mounted) {
         setState(() => _isRestoringConfig = false);
+        unawaited(_resolvePublicIp(showFeedback: false));
       }
     }
   }
@@ -59,6 +63,12 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
   Future<void> _openConfiguration() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(builder: (_) => const DDNSConfigScreen()),
+    );
+  }
+
+  Future<void> _openNetworkSettings() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(builder: (_) => const NetworkSettingsScreen()),
     );
   }
 
@@ -83,18 +93,25 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
     }
   }
 
-  Future<void> _resolvePublicIp() async {
+  Future<void> _resolvePublicIp({bool showFeedback = true}) async {
+    if (!mounted || _isResolvingIp) return;
     setState(() => _isResolvingIp = true);
     try {
-      final ip = await ref.read(ddnsManagerProvider.notifier).getPublicIP();
-      if (mounted) {
+      final addresses = await ref
+          .read(ddnsManagerProvider.notifier)
+          .getPublicIPs();
+      if (mounted && showFeedback) {
         _showMessage(
-          ip == null ? '暂时无法获取公网 IP。' : '公网 IP 已刷新。',
-          isError: ip == null,
+          addresses.ipv4 == null && addresses.ipv6 == null
+              ? '无法获取公网 IP，请检查网络及代理/VPN设置。'
+              : '公网 IP 已刷新。',
+          isError: addresses.ipv4 == null && addresses.ipv6 == null,
         );
       }
     } catch (error) {
-      if (mounted) _showMessage('获取公网 IP 失败：$error', isError: true);
+      if (mounted && showFeedback) {
+        _showMessage('获取公网 IP 失败：$error', isError: true);
+      }
     } finally {
       if (mounted) setState(() => _isResolvingIp = false);
     }
@@ -142,6 +159,11 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
         title: const Text('Nebula DDNS'),
         actions: [
           IconButton(
+            tooltip: '网络设置',
+            onPressed: _openNetworkSettings,
+            icon: const Icon(Icons.public_rounded),
+          ),
+          IconButton(
             tooltip: '配置 DDNS',
             onPressed: _openConfiguration,
             icon: const Icon(Icons.tune_rounded),
@@ -173,7 +195,8 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
                             isRunning: isRunning,
                             isConfigured: isConfigured,
                             serviceType: status['serviceType'] as String?,
-                            publicIp: status['publicIP'] as String?,
+                            publicIPv4: status['publicIPv4'] as String?,
+                            publicIPv6: status['publicIPv6'] as String?,
                             lastUpdate: lastUpdate,
                           ),
                           const SizedBox(height: 24),
@@ -227,12 +250,12 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
                           const SizedBox(height: 24),
                           Text(
                             '状态数据来自本机运行状态与 DDNS 操作记录。',
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
                           ),
                         ],
                       ),
@@ -254,13 +277,13 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
     final statusColor = !isConfigured
         ? colorScheme.outline
         : isRunning
-            ? colorScheme.primary
-            : colorScheme.tertiary;
+        ? colorScheme.primary
+        : colorScheme.tertiary;
     final statusText = !isConfigured
         ? '尚未配置'
         : isRunning
-            ? '服务运行中'
-            : '服务已停止';
+        ? '服务运行中'
+        : '服务已停止';
 
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
@@ -293,8 +316,8 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
           icon: !isConfigured
               ? Icons.settings_outlined
               : isRunning
-                  ? Icons.check_circle_outline_rounded
-                  : Icons.pause_circle_outline_rounded,
+              ? Icons.check_circle_outline_rounded
+              : Icons.pause_circle_outline_rounded,
         ),
       ],
     );
@@ -305,7 +328,8 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
     required bool isRunning,
     required bool isConfigured,
     required String? serviceType,
-    required String? publicIp,
+    required String? publicIPv4,
+    required String? publicIPv6,
     required DateTime? lastUpdate,
   }) {
     return LayoutBuilder(
@@ -314,8 +338,8 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
         final columns = constraints.maxWidth >= 900
             ? 4
             : constraints.maxWidth >= 560
-                ? 2
-                : 1;
+            ? 2
+            : 1;
         final width =
             (constraints.maxWidth - spacing * (columns - 1)) / columns;
         return Wrap(
@@ -326,12 +350,19 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
               width: width,
               child: _MetricCard(
                 title: '公网 IP',
-                value: publicIp ?? '尚未获取',
-                subtitle: publicIp == null ? '按需查询当前出口地址' : '最近一次查询结果',
+                value: '',
+                valueContent: Column(
+                  children: [
+                    _IpAddressLine(label: 'IPv4', value: publicIPv4),
+                    const SizedBox(height: 4),
+                    _IpAddressLine(label: 'IPv6', value: publicIPv6),
+                  ],
+                ),
+                subtitle: '外网查询结果；不代表入站可达',
                 icon: Icons.public_rounded,
                 action: IconButton(
                   tooltip: '刷新公网 IP',
-                  onPressed: _isResolvingIp ? null : _resolvePublicIp,
+                  onPressed: _isResolvingIp ? null : () => _resolvePublicIp(),
                   icon: _isResolvingIp
                       ? const SizedBox.square(
                           dimension: 18,
@@ -345,8 +376,9 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
               width: width,
               child: _MetricCard(
                 title: '上次更新',
-                value:
-                    lastUpdate == null ? '暂无记录' : _formatDateTime(lastUpdate),
+                value: lastUpdate == null
+                    ? '暂无记录'
+                    : _formatDateTime(lastUpdate),
                 subtitle: lastUpdate == null ? '尚未执行成功的更新' : '最近一次成功更新时间',
                 icon: Icons.schedule_rounded,
               ),
@@ -367,8 +399,8 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
                 value: !isConfigured
                     ? '待配置'
                     : isRunning
-                        ? '自动更新已启用'
-                        : '自动更新已暂停',
+                    ? '自动更新已启用'
+                    : '自动更新已暂停',
                 subtitle: isRunning ? '将按设定间隔检查并更新' : '可手动执行一次更新',
                 icon: isRunning
                     ? Icons.sync_rounded
@@ -403,6 +435,10 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
         children: [
           DropdownButtonFormField<int>(
             initialValue: _intervalSeconds,
+            dropdownColor: colorScheme.surface,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurface,
+            ),
             decoration: const InputDecoration(
               labelText: '自动更新间隔',
               prefixIcon: Icon(Icons.timer_outlined),
@@ -411,7 +447,12 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
                 .map(
                   (seconds) => DropdownMenuItem<int>(
                     value: seconds,
-                    child: Text(_formatInterval(seconds)),
+                    child: Text(
+                      _formatInterval(seconds),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
                   ),
                 )
                 .toList(),
@@ -427,8 +468,9 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color:
-                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
+              color: colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.55,
+              ),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
@@ -447,8 +489,8 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
                     isRunning
                         ? '调度器正在运行，您仍可随时手动更新。'
                         : isConfigured
-                            ? '服务启动后将按选定间隔自动更新。'
-                            : '先添加服务配置，之后即可启用自动更新。',
+                        ? '服务启动后将按选定间隔自动更新。'
+                        : '先添加服务配置，之后即可启用自动更新。',
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),
@@ -468,15 +510,15 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
                   isRunning
                       ? Icons.stop_circle_outlined
                       : isConfigured
-                          ? Icons.play_circle_outline_rounded
-                          : Icons.add_rounded,
+                      ? Icons.play_circle_outline_rounded
+                      : Icons.add_rounded,
                 ),
                 label: Text(
                   isRunning
                       ? '停止服务'
                       : isConfigured
-                          ? '启动服务'
-                          : '添加配置',
+                      ? '启动服务'
+                      : '添加配置',
                 ),
               ),
               OutlinedButton.icon(
@@ -525,8 +567,9 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
                 const SizedBox(height: 14),
                 _InfoRow(
                   label: '主机名',
-                  value:
-                      hostname?.trim().isNotEmpty == true ? hostname! : '未设置',
+                  value: hostname?.trim().isNotEmpty == true
+                      ? hostname!
+                      : '未设置',
                   icon: Icons.language_rounded,
                 ),
                 const SizedBox(height: 14),
@@ -541,8 +584,9 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color:
-                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+                color: colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.45,
+                ),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Column(
@@ -550,8 +594,9 @@ class _DDNSDashboardScreenState extends ConsumerState<DDNSDashboardScreen> {
                 children: [
                   Text(
                     '还没有 DDNS 配置',
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -687,10 +732,8 @@ class _StatusBadge extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(context).textTheme.labelLarge
+                ?.copyWith(color: color, fontWeight: FontWeight.w700),
           ),
         ],
       ),
@@ -705,6 +748,7 @@ class _MetricCard extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     this.action,
+    this.valueContent,
   });
 
   final String title;
@@ -712,6 +756,7 @@ class _MetricCard extends StatelessWidget {
   final String subtitle;
   final IconData icon;
   final Widget? action;
+  final Widget? valueContent;
 
   @override
   Widget build(BuildContext context) {
@@ -740,14 +785,18 @@ class _MetricCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
+            if (valueContent != null)
+              valueContent!
+            else
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
             const SizedBox(height: 5),
             Text(
               subtitle,
@@ -760,6 +809,46 @@ class _MetricCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _IpAddressLine extends StatelessWidget {
+  const _IpAddressLine({required this.label, required this.value});
+
+  final String label;
+  final String? value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final address = value ?? '未获取';
+    return Row(
+      children: [
+        SizedBox(
+          width: 42,
+          child: Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Tooltip(
+            message: address,
+            child: SelectableText(
+              address,
+              maxLines: 1,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -812,8 +901,9 @@ class _SectionCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: theme.textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -871,8 +961,9 @@ class _InfoRow extends StatelessWidget {
             textAlign: TextAlign.end,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -890,7 +981,8 @@ class _LogRow extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final lowerMessage = message.toLowerCase();
-    final isError = lowerMessage.contains('error') ||
+    final isError =
+        lowerMessage.contains('error') ||
         lowerMessage.contains('failed') ||
         lowerMessage.contains('失败');
     final iconColor = isError ? colorScheme.error : colorScheme.primary;

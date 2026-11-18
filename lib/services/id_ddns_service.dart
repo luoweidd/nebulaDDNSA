@@ -1,5 +1,6 @@
 // d:\projectfile\Fluterproject\nebulaDDNSA\lib\services\id_ddns_service.dart
 import 'package:nebula_ddns/config/ddns_config.dart';
+import 'package:nebula_ddns/services/public_ip_addresses.dart';
 
 /// DDNS 服务接口：定义所有 DDNS 服务的标准操作契约。
 ///
@@ -24,5 +25,8 @@ abstract class IDDNSService {
   /// 获取公网 IP 地址。
   ///
   /// 返回纯 IP 字符串（如 `203.0.113.5`），若解析失败返回 `null`。
-  Future<String?> getPublicIP();
+  Future<String?> getPublicIP({bool forceRefresh = false});
+
+  /// 获取 IPv4 和 IPv6 公网地址。
+  Future<PublicIPAddresses> getPublicIPs();
 }

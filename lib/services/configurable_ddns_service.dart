@@ -3,9 +3,12 @@
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:nebula_ddns/config/ddns_config.dart';
+
 import 'ddns_service_adapters.dart';
 import 'id_ddns_service.dart';
 import 'ip_resolver.dart';
+import 'network_settings.dart';
+import 'public_ip_addresses.dart';
 
 /// ConfigurableDDNSService：基于配置动态选择服务商适配器的实现。
 ///
@@ -20,8 +23,18 @@ import 'ip_resolver.dart';
 class ConfigurableDDNSService implements IDDNSService {
   final Dio _dio;
   final IPResolver? _providedIpResolver;
+  final Future<NetworkSettings> Function() _networkSettingsProvider;
   late final IPResolver _ipResolver =
-      _providedIpResolver ?? IPResolver(dioInstance: _dio);
+      _providedIpResolver ??
+      IPResolver(
+        dioInstance: _dio,
+        customInternalRangesProvider: () async =>
+            (await _networkSettingsProvider()).customInternalRanges,
+        customIPv4QueryEndpointsProvider: () async =>
+            (await _networkSettingsProvider()).customIPv4QueryUrls,
+        customIPv6QueryEndpointsProvider: () async =>
+            (await _networkSettingsProvider()).customIPv6QueryUrls,
+      );
   final Logger _logger;
   String _lastError = "No error.";
   int _retryCount = 0;
@@ -37,31 +50,37 @@ class ConfigurableDDNSService implements IDDNSService {
     Logger? logger,
     Duration? connectTimeout,
     Duration? receiveTimeout,
-  })  : _dio = dioInstance ??
-            Dio(
-              BaseOptions(
-                connectTimeout: connectTimeout ?? const Duration(seconds: 10),
-                receiveTimeout: receiveTimeout ?? const Duration(seconds: 30),
-                contentType: 'application/json',
-              ),
-            ),
-        _providedIpResolver = ipResolver,
-        _logger = logger ?? Logger() {
+    Future<NetworkSettings> Function()? networkSettingsProvider,
+  }) : _dio =
+           dioInstance ??
+           Dio(
+             BaseOptions(
+               connectTimeout: connectTimeout ?? const Duration(seconds: 10),
+               receiveTimeout: receiveTimeout ?? const Duration(seconds: 30),
+               contentType: 'application/json',
+             ),
+           ),
+       _providedIpResolver = ipResolver,
+       _networkSettingsProvider =
+           networkSettingsProvider ?? _defaultNetworkSettings,
+       _logger = logger ?? Logger() {
     // 添加请求拦截器：记录请求信息
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        _logger.i('[DDNS] Request: ${options.method} ${options.uri}');
-        return handler.next(options);
-      },
-      onResponse: (response, handler) {
-        _logger.i('[DDNS] Response: ${response.statusCode}');
-        return handler.next(response);
-      },
-      onError: (error, handler) {
-        _logger.w('[DDNS] Error: ${error.message}');
-        return handler.next(error);
-      },
-    ));
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          _logger.i('[DDNS] Request: ${options.method} ${options.uri}');
+          return handler.next(options);
+        },
+        onResponse: (response, handler) {
+          _logger.i('[DDNS] Response: ${response.statusCode}');
+          return handler.next(response);
+        },
+        onError: (error, handler) {
+          _logger.w('[DDNS] Error: ${error.message}');
+          return handler.next(error);
+        },
+      ),
+    );
   }
 
   /// 获取 Dio 客户端实例（用于测试）
@@ -85,15 +104,21 @@ class ConfigurableDDNSService implements IDDNSService {
   String getLastError() => _lastError;
 
   @override
-  Future<String?> getPublicIP() async {
+  Future<String?> getPublicIP({bool forceRefresh = false}) async {
     try {
-      final ip = await _ipResolver.resolvePublicIP();
+      final settings = await _networkSettingsProvider();
+      final ip = settings.ipv6OnlyMode
+          ? await _ipResolver.resolveVerifiedPublicIPv6()
+          : await _ipResolver.resolvePublicIP(forceRefresh: forceRefresh);
       return ip;
     } catch (e) {
       _logger.w('Failed to resolve public IP: $e');
       return null;
     }
   }
+
+  @override
+  Future<PublicIPAddresses> getPublicIPs() => _ipResolver.resolvePublicIPs();
 
   /// 获取适配器返回的错误详情。
   String _getLastErrorDetail() {
@@ -156,10 +181,16 @@ class ConfigurableDDNSService implements IDDNSService {
 
     try {
       // 若配置未指定 IP，则自动解析公网 IP 并注入到配置中
-      final resolvedConfig = await _resolveIPIfNeeded(config);
+      final settings = await _networkSettingsProvider();
+      final resolvedConfig = settings.ipv6OnlyMode
+          ? await _prepareIPv6OnlyConfig(config)
+          : await _resolveIPIfNeeded(config);
+      if (resolvedConfig == null) return false;
 
-      final adapter =
-          createAdapter(resolvedConfig.serviceType, dioInstance: _dio);
+      final adapter = createAdapter(
+        resolvedConfig.serviceType,
+        dioInstance: _dio,
+      );
       final result = await _retryWithExponentialBackoff(
         () => adapter.update(resolvedConfig),
       );
@@ -186,30 +217,78 @@ class ConfigurableDDNSService implements IDDNSService {
     }
   }
 
+  Future<DDNSConfig?> _prepareIPv6OnlyConfig(DDNSConfig config) async {
+    final requestConfig = config.updateRequestConfig;
+    final serviceType = config.serviceType.toLowerCase();
+    final supportsIPv6Update = switch (serviceType) {
+      'duckdns' => true,
+      'cloudflare' => requestConfig['type']?.toString().toUpperCase() == 'AAAA',
+      'custom_api' =>
+        requestConfig['ip_type']?.toString().toLowerCase() == 'ipv6',
+      _ => false,
+    };
+
+    if (!supportsIPv6Update) {
+      _lastError = '当前服务配置未明确支持只更新 IPv6 AAAA；已保留 IPv4 A 记录。';
+      return null;
+    }
+
+    final ipv6 = await _ipResolver.resolveVerifiedPublicIPv6();
+    if (ipv6 == null) {
+      _lastError = '公网 IPv6 未通过全球单播及多源一致性验证；已保留 IPv4 A 记录。';
+      return null;
+    }
+
+    final ipv6RequestConfig = {
+      ...requestConfig,
+      'ip': ipv6,
+      'ip_type': 'ipv6',
+      if (serviceType == 'cloudflare') 'type': 'AAAA',
+    };
+    return config.copyWith({
+      'ip': ipv6,
+    }, updateRequestConfig: ipv6RequestConfig);
+  }
+
   /// 若配置未指定 IP，则自动解析公网 IP 并注入到配置中
   Future<DDNSConfig> _resolveIPIfNeeded(DDNSConfig config) async {
     final ip = config.updateRequestConfig['ip'];
     if (ip != null && ip.toString().isNotEmpty) {
+      await _ipResolver.ensureNoProxyOrVpn();
       return config;
     }
+
     try {
-      final resolvedIP = await _ipResolver.resolvePublicIP();
-      if (resolvedIP.isNotEmpty) {
+      await _ipResolver.ensureNoProxyOrVpn();
+      final ipType = config.updateRequestConfig['ip_type']
+          ?.toString()
+          .toLowerCase();
+      final resolvedIP = switch (ipType) {
+        'ipv4' => await _ipResolver.resolveIPv4(),
+        'ipv6' => await _ipResolver.resolveIPv6(),
+        _ => await _ipResolver.resolvePublicIP(),
+      };
+      if (resolvedIP != null && resolvedIP.isNotEmpty) {
         _logger.i('Resolved public IP: $resolvedIP');
-        return config.copyWith({
-          'ip': resolvedIP,
-        }, updateRequestConfig: {
-          ...config.updateRequestConfig,
-          'ip': resolvedIP,
-        });
+        return config.copyWith(
+          {'ip': resolvedIP},
+          updateRequestConfig: {
+            ...config.updateRequestConfig,
+            'ip': resolvedIP,
+          },
+        );
       }
       _logger.w('Unable to resolve public IP, using configured IP or empty');
       return config;
     } catch (e) {
       _logger.w('Failed to resolve public IP: $e');
+      if (e is NetworkPathBlockedException) rethrow;
       return config;
     }
   }
+
+  static Future<NetworkSettings> _defaultNetworkSettings() async =>
+      const NetworkSettings();
 
   /// 指数退避重试机制
   Future<Map<String, dynamic>> _retryWithExponentialBackoff(
@@ -220,9 +299,7 @@ class ConfigurableDDNSService implements IDDNSService {
         final result = await fn();
         final statusCode = result['statusCode'];
         if (statusCode is int &&
-            (statusCode == 408 ||
-                statusCode == 429 ||
-                statusCode >= 500)) {
+            (statusCode == 408 || statusCode == 429 || statusCode >= 500)) {
           throw DioException(
             requestOptions: RequestOptions(path: _config?.apiUrl ?? ''),
             response: Response(
@@ -246,7 +323,8 @@ class ConfigurableDDNSService implements IDDNSService {
         // 指数退避：等待时间 = baseDelay * 2^retryCount（使用位移运算保证整数精确）
         final delay = Duration(seconds: 2 * (1 << _retryCount));
         _logger.w(
-            '[DDNS] Retry ${_retryCount + 1}/$_maxRetries in ${delay.inSeconds} seconds...');
+          '[DDNS] Retry ${_retryCount + 1}/$_maxRetries in ${delay.inSeconds} seconds...',
+        );
 
         // 等待一段时间后重试
         await Future.delayed(delay);

@@ -1,7 +1,109 @@
 // d:\projectfile\Fluterproject\nebulaDDNSA\lib\services\ip_resolver.dart
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
+
+import 'public_ip_addresses.dart';
+
+class IpNetworkRange {
+  final InternetAddress network;
+  final int prefixLength;
+
+  const IpNetworkRange(this.network, this.prefixLength);
+
+  factory IpNetworkRange.parse(String value) {
+    final parts = value.trim().split('/');
+    if (parts.length > 2 || parts.first.isEmpty) {
+      throw FormatException('Invalid IP network range: $value');
+    }
+
+    final network = InternetAddress.tryParse(parts.first);
+    if (network == null) {
+      throw FormatException('Invalid IP address in network range: $value');
+    }
+    final addressBits = network.type == InternetAddressType.IPv4 ? 32 : 128;
+    final prefixLength = parts.length == 1
+        ? addressBits
+        : int.tryParse(parts[1]);
+    if (prefixLength == null ||
+        prefixLength < 0 ||
+        prefixLength > addressBits) {
+      throw FormatException('Invalid prefix length in network range: $value');
+    }
+    return IpNetworkRange(network, prefixLength);
+  }
+
+  bool contains(InternetAddress address) {
+    if (address.type != network.type) return false;
+    final networkBytes = network.rawAddress;
+    final addressBytes = address.rawAddress;
+    final fullBytes = prefixLength ~/ 8;
+    for (var index = 0; index < fullBytes; index++) {
+      if (networkBytes[index] != addressBytes[index]) return false;
+    }
+
+    final remainingBits = prefixLength % 8;
+    if (remainingBits == 0) return true;
+    final mask = (0xff << (8 - remainingBits)) & 0xff;
+    return (networkBytes[fullBytes] & mask) == (addressBytes[fullBytes] & mask);
+  }
+
+  String get normalized => '${network.address}/$prefixLength';
+}
+
+class NetworkPathBlockedException implements Exception {
+  final String reason;
+
+  const NetworkPathBlockedException(this.reason);
+
+  @override
+  String toString() => reason;
+}
+
+class NetworkPathGuard {
+  static const _proxyEnvironmentKeys = {
+    'HTTP_PROXY',
+    'HTTPS_PROXY',
+    'ALL_PROXY',
+    'FTP_PROXY',
+  };
+  static final _vpnInterfacePattern = RegExp(
+    r'\b(?:tun|tap|ppp|wg|utun|wintun|wireguard|openvpn|tailscale|zerotier|vpn|nordlynx|anyconnect|proton|mullvad|expressvpn|surfshark|clash|sing-box|v2ray|shadowsocks)\w*\b',
+    caseSensitive: false,
+  );
+
+  final Map<String, String> _environment;
+  final Future<List<String>> Function() _interfaceNames;
+
+  NetworkPathGuard({
+    Map<String, String>? environment,
+    Future<List<String>> Function()? interfaceNames,
+  }) : _environment = environment ?? Platform.environment,
+       _interfaceNames = interfaceNames ?? _loadInterfaceNames;
+
+  Future<String?> findProxyOrVpn() async {
+    for (final entry in _environment.entries) {
+      if (_proxyEnvironmentKeys.contains(entry.key.toUpperCase()) &&
+          entry.value.trim().isNotEmpty) {
+        return '检测到代理环境变量 ${entry.key}';
+      }
+    }
+
+    final interfaces = await _interfaceNames();
+    for (final name in interfaces) {
+      if (_vpnInterfacePattern.hasMatch(name)) {
+        return '检测到疑似 VPN/代理网络接口：$name';
+      }
+    }
+    return null;
+  }
+
+  static Future<List<String>> _loadInterfaceNames() async {
+    final interfaces = await NetworkInterface.list();
+    return interfaces.map((interface) => interface.name).toList();
+  }
+}
 
 /// IPResolver：跨平台公共 IP 地址解析服务。
 ///
@@ -15,6 +117,10 @@ class IPResolver {
   final Dio _dio;
   final Logger _logger;
   final List<String> _queryEndpoints;
+  final NetworkPathGuard _networkPathGuard;
+  final Future<List<String>> Function() _customInternalRangesProvider;
+  final Future<List<String>> Function() _customIPv4QueryEndpointsProvider;
+  final Future<List<String>> Function() _customIPv6QueryEndpointsProvider;
   bool _hasResolvedIPv6 = false;
   bool _hasResolvedIPv4 = false;
 
@@ -28,29 +134,78 @@ class IPResolver {
     Logger? logger,
     List<String>? queryEndpoints,
     Duration? timeout,
-  })  : _dio = dioInstance ??
-            Dio(BaseOptions(
-              connectTimeout: timeout ?? const Duration(seconds: 10),
-              receiveTimeout: timeout ?? const Duration(seconds: 10),
-            )),
-        _logger = logger ?? Logger(),
-        _queryEndpoints = queryEndpoints ??
-            const [
-              'https://api.ipify.org',
-              'https://ipv4.icanhazip.com',
-              'https://api64.ipify.org',
-            ];
+    NetworkPathGuard? networkPathGuard,
+    Future<List<String>> Function()? customInternalRangesProvider,
+    Future<List<String>> Function()? customIPv4QueryEndpointsProvider,
+    Future<List<String>> Function()? customIPv6QueryEndpointsProvider,
+  }) : _dio =
+           dioInstance ??
+           Dio(
+             BaseOptions(
+               connectTimeout: timeout ?? const Duration(seconds: 10),
+               receiveTimeout: timeout ?? const Duration(seconds: 10),
+             ),
+           ),
+       _logger = logger ?? Logger(),
+       _networkPathGuard = networkPathGuard ?? NetworkPathGuard(),
+       _customInternalRangesProvider =
+           customInternalRangesProvider ?? _emptyInternalRanges,
+       _customIPv4QueryEndpointsProvider =
+           customIPv4QueryEndpointsProvider ?? _emptyInternalRanges,
+       _customIPv6QueryEndpointsProvider =
+           customIPv6QueryEndpointsProvider ?? _emptyInternalRanges,
+       _queryEndpoints =
+           queryEndpoints ??
+           const [
+             'https://api.ipify.org',
+             'https://ipv4.icanhazip.com',
+             'https://api64.ipify.org',
+             'https://4.ipw.cn',
+           ];
 
   /// 解析公共 IPv4 地址。
   ///
   /// 返回地址字符串，若解析失败则返回 null。
   Future<String?> resolveIPv4() async {
+    final internalRanges = await _loadCustomInternalRanges();
+    final customEndpoints = (await _customIPv4QueryEndpointsProvider())
+        .toSet()
+        .toList();
+    if (customEndpoints.isNotEmpty) {
+      final results = await Future.wait(
+        customEndpoints.map((endpoint) async {
+          try {
+            final response = await _dio.get(endpoint);
+            final value = response.data.toString().trim();
+            final address = InternetAddress.tryParse(value);
+            if (address?.type != InternetAddressType.IPv4 ||
+                _isInInternalRange(address!, internalRanges)) {
+              _logger.w('Rejected non-public IPv4 response from $endpoint');
+              return null;
+            }
+            return address.address;
+          } catch (error) {
+            _logger.w('IPv4 lookup failed at $endpoint: $error');
+            return null;
+          }
+        }),
+      );
+      final resolved = _selectConsistentResult(
+        results,
+        minimumResponses: customEndpoints.length == 1 ? 1 : 2,
+        label: 'IPv4',
+      );
+      if (resolved != null) _hasResolvedIPv4 = true;
+      return resolved;
+    }
+
     for (final endpoint in _queryEndpoints) {
       try {
         final response = await _dio.get(endpoint);
         final value = response.data.toString().trim();
         final address = InternetAddress.tryParse(value);
-        if (address?.type == InternetAddressType.IPv4) {
+        if (address?.type == InternetAddressType.IPv4 &&
+            !_isInInternalRange(address!, internalRanges)) {
           _hasResolvedIPv4 = true;
           return value;
         }
@@ -65,17 +220,74 @@ class IPResolver {
   ///
   /// 返回地址字符串，若解析失败则返回 null。
   Future<String?> resolveIPv6() async {
-    try {
-      final response = await _dio.get('https://api64.ipify.org');
-      final value = response.data.toString().trim();
-      final address = InternetAddress.tryParse(value);
-      if (address?.type != InternetAddressType.IPv6) return null;
-      _hasResolvedIPv6 = true;
-      return value;
-    } catch (e) {
-      _logger.w('IPv6 remote resolution failed: $e');
+    return resolveVerifiedPublicIPv6();
+  }
+
+  /// Requires configured IPv6 lookup endpoints to agree on a global
+  /// unicast address before using it.
+  Future<String?> resolveVerifiedPublicIPv6() async {
+    await ensureNoProxyOrVpn();
+    final internalRanges = await _loadCustomInternalRanges();
+    final customEndpoints = (await _customIPv6QueryEndpointsProvider())
+        .toSet()
+        .toList();
+    final endpoints = customEndpoints.isEmpty
+        ? const [
+            'https://api6.ipify.org',
+            'https://ipv6.icanhazip.com',
+            'https://6.ipw.cn',
+          ]
+        : customEndpoints;
+    final results = await Future.wait(
+      endpoints.map((endpoint) async {
+        try {
+          final response = await _dio.get(endpoint);
+          final value = response.data.toString().trim();
+          final address = InternetAddress.tryParse(value);
+          if (address?.type != InternetAddressType.IPv6 ||
+              !_isGlobalUnicastIPv6(address!) ||
+              _isInInternalRange(address, internalRanges)) {
+            _logger.w('Rejected non-public IPv6 response from $endpoint');
+            return null;
+          }
+          return address.address;
+        } catch (error) {
+          _logger.w('IPv6 verification failed at $endpoint: $error');
+          return null;
+        }
+      }),
+    );
+
+    final resolved = _selectConsistentResult(
+      results,
+      minimumResponses: endpoints.length == 1 ? 1 : 2,
+      label: 'IPv6',
+    );
+    if (resolved != null) _hasResolvedIPv6 = true;
+    return resolved;
+  }
+
+  String? _selectConsistentResult(
+    List<String?> results, {
+    required int minimumResponses,
+    required String label,
+  }) {
+    final addresses = results.whereType<String>().toSet();
+    final successfulResults = results.whereType<String>().length;
+    if (successfulResults < minimumResponses || addresses.length != 1) {
+      _logger.w('$label lookup results were insufficient or inconsistent');
       return null;
     }
+    return addresses.single;
+  }
+
+  Future<PublicIPAddresses> resolvePublicIPs() async {
+    await ensureNoProxyOrVpn();
+    final results = await Future.wait<String?>([
+      resolveIPv4(),
+      resolveVerifiedPublicIPv6(),
+    ]);
+    return PublicIPAddresses(ipv4: results[0], ipv6: results[1]);
   }
 
   /// 检测当前网络接口是否支持 IPv6。
@@ -104,6 +316,40 @@ class IPResolver {
     return null;
   }
 
+  /// 阻止在已知代理或 VPN 网络路径下使用出口 IP 更新 DDNS。
+  Future<void> ensureNoProxyOrVpn() async {
+    final reason = await _networkPathGuard.findProxyOrVpn();
+    if (reason != null) {
+      clearCache();
+      throw NetworkPathBlockedException('$reason；为避免解析到代理出口 IP，请关闭代理/VPN 后重试');
+    }
+  }
+
+  Future<List<IpNetworkRange>> _loadCustomInternalRanges() async =>
+      (await _customInternalRangesProvider())
+          .map(IpNetworkRange.parse)
+          .toList(growable: false);
+
+  bool _isInInternalRange(
+    InternetAddress address,
+    List<IpNetworkRange> ranges,
+  ) => ranges.any((range) => range.contains(address));
+
+  bool _isGlobalUnicastIPv6(InternetAddress address) {
+    final bytes = address.rawAddress;
+    if (address.type != InternetAddressType.IPv6 || (bytes[0] & 0xe0) != 0x20) {
+      return false;
+    }
+    return !const [
+      '2001:db8::/32',
+      '2001::/23',
+      '2002::/16',
+      '3fff::/20',
+    ].map(IpNetworkRange.parse).any((range) => range.contains(address));
+  }
+
+  static Future<List<String>> _emptyInternalRanges() async => const [];
+
   /// 解析公共 IP 地址（自动检测 IPv4/IPv6）。
   ///
   /// 优先返回 IPv6 地址（若支持），否则返回 IPv4 地址。
@@ -111,14 +357,23 @@ class IPResolver {
   /// 返回纯 IP 字符串（如 `203.0.113.5` 或 `2001:db8::1`），不含类型后缀。
   ///
   /// 若无法解析，抛出 [Exception]。
-  Future<String> resolvePublicIP() async {
+  Future<String> resolvePublicIP({bool forceRefresh = false}) async {
+    if (forceRefresh) clearCache();
+    await ensureNoProxyOrVpn();
+    final internalRanges = await _loadCustomInternalRanges();
+
     // 检查缓存
     final now = DateTime.now().millisecondsSinceEpoch;
     if (_cachedIP != null &&
         _cachedIPTime != null &&
         (now - _cachedIPTime!.millisecondsSinceEpoch) < _cacheDuration) {
-      _logger.i('Using cached IP: $_cachedIP');
-      return _cachedIP!;
+      final cachedAddress = InternetAddress.tryParse(_cachedIP!);
+      if (cachedAddress != null &&
+          !_isInInternalRange(cachedAddress, internalRanges)) {
+        _logger.i('Using cached IP: $_cachedIP');
+        return _cachedIP!;
+      }
+      clearCache();
     }
 
     try {

@@ -1,10 +1,11 @@
 // d:\projectfile\Fluterproject\nebulaDDNSA\lib\ddns_manager.dart
 import 'package:nebula_ddns/config/ddns_config.dart';
 import 'package:nebula_ddns/services/id_ddns_service.dart';
+import 'package:nebula_ddns/services/public_ip_addresses.dart';
 import 'package:nebula_ddns/scheduler/scheduler.dart';
 
 /// DDNSManager：核心业务逻辑层，负责配置、服务调用和调度管理。
-/// 
+///
 /// 企业级特性：
 /// - 依赖注入模式（通过构造函数或 Provider）
 /// - 统一的日志记录接口
@@ -40,14 +41,14 @@ class DDNSManager {
       _log('Error: Configuration not loaded.');
       return;
     }
-    
+
     // 检查状态
     ddnsService.checkStatus(_config!).then((_) {});
-    
+
     // 初始化调度器
     scheduler.initialize(ddnsService, _config!, intervalSeconds);
     scheduler.start();
-    
+
     _isRunning = true;
     _log('DDNS Service started with interval: ${intervalSeconds}s');
   }
@@ -110,14 +111,16 @@ class DDNSManager {
   }
 
   /// 获取公网 IP（带缓存）
-  Future<String?> getPublicIP() async {
+  Future<String?> getPublicIP({bool forceRefresh = false}) async {
     try {
-      return await ddnsService.getPublicIP();
+      return await ddnsService.getPublicIP(forceRefresh: forceRefresh);
     } catch (e) {
       _log('Failed to get public IP: $e');
       return null;
     }
   }
+
+  Future<PublicIPAddresses> getPublicIPs() => ddnsService.getPublicIPs();
 
   /// 执行手动更新
   Future<bool> updateNow() async {
@@ -125,7 +128,7 @@ class DDNSManager {
       _log('Error: Configuration not loaded.');
       return false;
     }
-    
+
     try {
       final success = await ddnsService.updateDDNS(_config!);
       if (success) {
@@ -147,7 +150,7 @@ class DDNSManager {
   void _log(String message) {
     final timestamp = DateTime.now().toIso8601String();
     final logEntry = '$timestamp - $message';
-    
+
     // 添加到本地日志列表（限制数量）
     _logs.add(logEntry);
     if (_logs.length > 200) {

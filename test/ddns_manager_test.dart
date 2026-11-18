@@ -4,6 +4,7 @@ import 'package:nebula_ddns/config/ddns_config.dart';
 import 'package:nebula_ddns/services/id_ddns_service.dart';
 import 'package:nebula_ddns/scheduler/scheduler.dart';
 import 'package:nebula_ddns/ddns_manager.dart';
+import 'package:nebula_ddns/services/public_ip_addresses.dart';
 
 // 模拟依赖
 class MockDDNSService extends Mock implements IDDNSService {
@@ -17,8 +18,16 @@ class MockDDNSService extends Mock implements IDDNSService {
   Future<bool> updateDDNS(DDNSConfig config) async => true;
 
   @override
-  Future<String?> getPublicIP() async => '203.0.113.1';
+  Future<String?> getPublicIP({bool forceRefresh = false}) async =>
+      '203.0.113.1';
+
+  @override
+  Future<PublicIPAddresses> getPublicIPs() async => const PublicIPAddresses(
+        ipv4: '203.0.113.1',
+        ipv6: '2001:4860:4860::8888',
+      );
 }
+
 class MockScheduler extends Mock implements Scheduler {}
 
 void main() {
@@ -79,9 +88,9 @@ void main() {
       manager.loadConfig(testConfig);
       // 模拟服务检查成功
       manager.startService(60);
-      
+
       final status = await manager.getStatus();
-      
+
       expect(status['isRunning'], isTrue);
       expect(status['isUpdateSuccessful'], isFalse);
       expect(status['lastError'], 'No error.');

@@ -152,6 +152,10 @@ launchctl list nebula.ddns.client
 #### 常见错误
 
 - `Network or Parsing Error`：检查网络、DNS、代理和 TLS 证书。
+- 检测到代理环境变量或常见 VPN/隧道网卡时，客户端会阻止公网 IP 查询及 DDNS 更新；请关闭代理/VPN 后重试。检测依据是环境变量和网卡名称，无法识别所有系统级代理或伪装/透明 VPN。
+- DDNS 只把域名记录指向公网出口 IP，不会建立到本机的隧道，也不会自动配置路由器端口映射。要从公网访问本机，仍需可入站访问的公网地址、路由器端口转发及防火墙放行；若运营商使用 CGNAT，需联系运营商或采用具备入站转发能力的隧道服务。
+- “IPv6-only DDNS 模式”默认关闭，需在“网络设置”中显式启用：保留 IPv4 A 记录，只更新已有 AAAA 记录；必须通过全球单播地址校验及至少两个有效 IPv6 查询结果全部一致的验证。Cloudflare 需配置现有 AAAA 记录，DuckDNS 使用 IPv6 参数，自定义 API 需声明 `ip_type: ipv6`；其他未明确支持 IPv6 的内置服务会拒绝更新。自定义内网地址支持 IPv4/IPv6 地址或 CIDR，命中范围的结果会被排除。
+- “网络设置”可为 IPv4、IPv6 分别配置自定义公网 IP 查询地址，每行一个返回纯 IP 的 HTTP(S) URL；留空使用内置查询源，非空时替换该协议的内置查询源。配置多条时并发查询，至少两条有效结果且所有有效结果一致才采用；只配置一条时使用该条结果。请求失败或返回无效地址的来源会被忽略。
 - HTTP `401/403`：检查账号凭据及 API Token 权限。
 - HTTP `429`：服务端限流；客户端按指数退避策略重试。
 - Android Gradle 下载失败：检查到 Gradle Plugin Portal、Google Maven、Maven Central 的网络、DNS 和 TLS 连接。

@@ -12,6 +12,7 @@ class _MockAdapter implements HttpClientAdapter {
   final Map<String, dynamic> responseData;
   final int statusCode;
   final DioException? error;
+  RequestOptions? lastRequestOptions;
 
   _MockAdapter({
     required this.responseData,
@@ -25,6 +26,7 @@ class _MockAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    lastRequestOptions = options;
     if (error != null) {
       throw error!;
     }
@@ -132,6 +134,27 @@ void main() {
 
       expect(result['success'], isFalse);
       expect(result['error'], contains('DuckDNS update failed'));
+    });
+
+    test('DuckDNS IPv6 updates use only the ipv6 parameter', () async {
+      final adapter = _MockAdapter(
+        responseData: {},
+        statusCode: 200,
+        error: null,
+      );
+      dio.httpClientAdapter = adapter;
+
+      final result = await createAdapter('duckdns', dioInstance: dio).update(
+        buildConfig('duckdns', {
+          'ip': '2606:4700:4700::1111',
+          'ip_type': 'ipv6',
+        }),
+      );
+
+      expect(result['success'], isTrue);
+      final requestData = adapter.lastRequestOptions?.data as Map;
+      expect(requestData['ipv6'], '2606:4700:4700::1111');
+      expect(requestData.containsKey('ip'), isFalse);
     });
 
     test('UpIvY adapter should return success on 200', () async {
