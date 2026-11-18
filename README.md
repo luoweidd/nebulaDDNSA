@@ -35,6 +35,13 @@
 
 ## 正式发布版 1.0.0
 
+### GitHub Actions 自动发布
+
+- Pull request、推送到 `main` 及手动触发会运行依赖锁定检查、静态分析、完整测试和 Windows x64 Release 构建。
+- 推送与 `pubspec.yaml` 版本一致的 `vX.Y.Z` 标签（例如 `v1.0.0`）后，检查通过会自动创建 GitHub Release，并附上 `Nebula-DDNS-X.Y.Z-Windows-x64.zip`。
+- 当前自动分发仅覆盖 Windows x64；其他平台须在相应工具链和设备上单独验证后再加入发布流程。
+- Windows ZIP 属于通用构建产物，本项目不将其发布到 GitHub Packages；按当前分发方式使用 GitHub Releases。
+
 ### 发布内容
 
 - 桌面端支持系统托盘、周期更新及 Windows Task Scheduler、Linux systemd 用户服务、macOS LaunchAgent 开机启动。
